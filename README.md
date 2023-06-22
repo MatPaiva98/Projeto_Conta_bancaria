@@ -2,7 +2,6 @@
 Desafio 1: Criando um Sistema Bancário com Python. (DIO)
 
 import os
-import sys
 
 menu = """
 [1] Depositar
@@ -28,8 +27,7 @@ def validador_cpf(cpf):
     entrada_e_sequencial = cpf == cpf[0] * len(cpf)
 
     if entrada_e_sequencial:
-        print('Você enviou dados sequenciais.')
-        sys.exit() # cancela o código 
+        return ('Você enviou dados sequenciais.')
 
     nove_digitos = cpf[:9]
     contador_regressivo_1 = 10
@@ -61,14 +59,17 @@ def validador_cpf(cpf):
 def sacar(*, saldo, valor, extrato, limite, numero_saques):
     global saldo_total
     global valor_final
+    global saques_realizados
     try:
         valor_float = float(valor)
     except ValueError:
         return 'Informe um valor válido!'
     if valor_float > saldo:
+        saques_realizados -= 1
         return ('Saldo insuficiente!\n'
                 f'Seu saldo é de R$ {saldo:.2f}')
     elif valor_float > limite:
+        saques_realizados -= 1
         return f'Seu limite máximo por saque é de R$ {limite:.2f}'
     elif numero_saques > 3:
         return (f'Esse é seu {numero_saques} saque.\n'
