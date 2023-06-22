@@ -1,7 +1,8 @@
 # Projeto_Conta_bancaria
 Desafio 1: Criando um Sistema Bancário com Python. (DIO)
 
-import os 
+import os
+import sys
 
 menu = """
 [1] Depositar
@@ -22,6 +23,40 @@ usuarios = []
 AGENCIA = '0001'
 numero_conta = 0
 contas = []
+
+def validador_cpf(cpf):
+    entrada_e_sequencial = cpf == cpf[0] * len(cpf)
+
+    if entrada_e_sequencial:
+        print('Você enviou dados sequenciais.')
+        sys.exit() # cancela o código 
+
+    nove_digitos = cpf[:9]
+    contador_regressivo_1 = 10
+
+    resultado_digito_1 = 0
+    for digito in nove_digitos:
+        resultado_digito_1 += int(digito) * contador_regressivo_1
+        contador_regressivo_1 -= 1
+    digito_1 = (resultado_digito_1 * 10) % 11
+    digito_1 = digito_1 if digito_1 <= 9 else 0
+
+    dez_digitos = nove_digitos + str(digito_1)
+    contador_regressivo_2 = 11
+
+    resultado_digito_2 = 0
+    for digito in dez_digitos:
+        resultado_digito_2 += int(digito) * contador_regressivo_2
+        contador_regressivo_2 -= 1
+    digito_2 = (resultado_digito_2 * 10) % 11
+    digito_2 = digito_2 if digito_2 <= 9 else 0
+
+    cpf_gerado_pelo_calculo = f'{nove_digitos}{digito_1}{digito_2}'
+
+    if cpf == cpf_gerado_pelo_calculo:
+        return True
+    else:
+        return None
 
 def sacar(*, saldo, valor, extrato, limite, numero_saques):
     global saldo_total
@@ -68,6 +103,8 @@ def final(saldo, /, *, extrato):
     
 def criar_usuario(usuario):
     cpf = input('Informe seu CPF: ').replace('.', '').replace('-', '')
+    if validador_cpf(cpf) is not True:
+        return ('CPF inválido!')
     usuario = filtrar_usuario(cpf, usuarios)
 
     if usuario:
@@ -75,7 +112,7 @@ def criar_usuario(usuario):
         
     nome = input('Informe seu nome: ')
     data_nascimento = input('Informe a data de nascimento (dd-mm-aaaa): ')
-    endereco = input('Informe seu endereço' \
+    endereco = input('Informe seu endereço ' \
                      '(logradouro, nro - bairro - cidade/sigla estado): ')
     
     usuarios.append({"nome": nome, "data_nascimento": data_nascimento, \
@@ -91,19 +128,17 @@ def criar_conta(agencia, numero_conta, usuario):
     usuario = filtrar_usuario(cpf, usuarios)
 
     if usuario:
-        contas.append({'agencia': agencia, 'numero_conta': numero_conta, "usuario": usuario['nome']})
-        return ("@@@ Conta criada com sucesso! @@@\n")
-    else:
-        return 'Usuário não encontrado!'
+        print("🆕 Conta criada com sucesso! 🆕")
+        return{'agencia': agencia, 'numero_conta': numero_conta, "usuario": usuario}
+    return 'Usuário não encontrado!'
     
 def listar_contas(contas):
     for conta in contas:
-        
         linha = (f'Agência: {conta["agencia"]}\n'
             f'C/C: {conta["numero_conta"]}\n'
-            f'Titular: {conta["usuario"]}\n'
-            '#######################################')
-        return linha
+            f'Titular: {conta["usuario"]["nome"]}\n'
+            '#######################################\n')
+        print(linha)
 
 while True:
 
@@ -130,7 +165,9 @@ while True:
 
     elif opcao == '5':
         numero_conta += 1
-        print(criar_conta(AGENCIA, numero_conta, usuarios))
+        conta = criar_conta(AGENCIA, numero_conta, usuarios)
+        if conta:
+                contas.append(conta)
 
     elif opcao == '6':
         if contas == None:
@@ -141,7 +178,6 @@ while True:
     elif opcao == '7':
         break
 
-    elif opcao is not '1' or opcao is not '2' or opcao is not '3' or opcao is not '4'\
-        or opcao is not '5' or opcao is not '6' or opcao is not '7':
+    else:
         print('Você não escolheu nenhuma das opções!\n'
               'Tente novamente!')
